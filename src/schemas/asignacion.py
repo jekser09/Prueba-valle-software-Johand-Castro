@@ -8,7 +8,7 @@ from pydantic import Field
 
 from src.schemas.common import Identificador, SchemaBase
 
-HorasPositivas = Annotated[Decimal, Field(gt=0, decimal_places=2, allow_inf_nan=False)]
+HorasPositivas = Annotated[Decimal, Field(gt=0, max_digits=12, decimal_places=2, allow_inf_nan=False)]
 
 
 class AsignacionCreate(SchemaBase):

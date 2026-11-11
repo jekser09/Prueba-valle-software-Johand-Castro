@@ -54,13 +54,13 @@ src/
         routes.py       # Rutas de la API
 ```
 
-`services` es el nombre elegido para la lógica del programa. Los esquemas validan la estructura de los datos, los servicios aplican las reglas de negocio y `database` gestiona su persistencia. El paquete `src/prueba_tecnica_johand_castro/` se conserva como parte de la plantilla original; el arranque de la API utiliza `main:app`.
+`services` contiene la lógica del programa. El flujo es `routes → services → database`: los esquemas validan los datos, los servicios aplican las reglas de negocio y los módulos `estudiantes.py`, `empresas.py`, `asignaciones_practica.py` y `reportes_horas.py` en `database` ejecutan las consultas parametrizadas. Los servicios no contienen SQL. El arranque de la API utiliza `main:app`.
 
-La ruta `GET /health` devuelve `{"status": "ok"}` para comprobar la disponibilidad de la API. Las diez operaciones de negocio propuestas en `REQUIREMENTS.md` están registradas en `src/routes/routes.py`, con respuestas provisionales como `{"endpoint": "listar_estudiantes"}`. Todavía no consultan ni modifican la base de datos; los `POST` devuelven `200` provisionalmente, hasta implementar la creación real con `201`.
+La ruta `GET /health` devuelve `{"status": "ok"}`. La API implementa CRUD de estudiantes, empresas, asignaciones y reportes: `POST` crea (`201`), `GET` lista o consulta (`200`), `PUT` actualiza todos los campos editables (`200`) y `DELETE` elimina (`204`). Se conservan las consultas de reportes por asignación y avance por estudiante, disponibles en `/docs`.
 
-Los esquemas Pydantic están separados por entidad en `src/schemas/`, con modelos `Create` y `Read`, además de `AvanceRead`. Los `POST` validan el cuerpo de la petición: textos obligatorios, formato básico de correo, identificadores positivos, fechas, horas positivas con hasta dos decimales, límite semanal de 168 horas y semanas que comienzan en lunes y no son futuras. Los identificadores de las rutas también deben ser positivos. Las entradas inválidas devuelven `422`.
+Los esquemas Pydantic están separados por entidad en `src/schemas/`, con modelos `Create` y `Read`, además de `AvanceRead`. Los `POST` y `PUT` comparten los modelos de entrada y validan textos obligatorios, formato básico de correo, identificadores positivos, fechas, horas positivas con hasta dos decimales, límite semanal de 168 horas y semanas que comienzan en lunes y no son futuras. La meta de horas admite hasta 12 dígitos totales. Las entradas inválidas devuelven `422`.
 
-Los modelos de lectura quedan preparados para integrar los servicios; las respuestas actuales usan `EndpointResponse`. Las comprobaciones que requieren consultar datos, como existencia de entidades, duplicados y fecha de inicio de la práctica, quedan pendientes en la lógica de negocio.
+Los servicios comprueban la existencia de registros (`404`), la semana frente al inicio de la práctica (`422`) y los conflictos (`409`). Se bloquea la eliminación de registros con dependencias y el cambio de estudiante o empresa en asignaciones con reportes. Las escrituras se ejecutan en transacciones que incluyen las comprobaciones; un error revierte la operación. El avance se calcula con precisión decimal y puede superar el 100 %. Los decimales se devuelven como cadenas JSON, por ejemplo `"45.83"`.
 
 ## Ejecución local
 
@@ -90,7 +90,17 @@ with get_connection() as connection:
     estudiantes = connection.execute("SELECT * FROM estudiantes").fetchall()
 ```
 
-Las horas se almacenan como centésimas enteras para conservar su precisión. Los archivos de base de datos locales se excluyen de Git. La propuesta de campos, rutas, reglas y criterios de aceptación se encuentra en [REQUIREMENTS.md](REQUIREMENTS.md). Los endpoints de negocio y el frontend siguen pendientes.
+Las horas se almacenan como centésimas enteras para conservar su precisión. Los archivos de base de datos locales se excluyen de Git. Las reglas y los criterios de aceptación se encuentran en [REQUIREMENTS.md](REQUIREMENTS.md). El frontend sigue pendiente.
+
+## Verificación
+
+Las pruebas usan bases de datos aisladas y no modifican `practicas.sqlite3`:
+
+```powershell
+uv run python -m unittest discover -s tests -v
+```
+
+Cubren el CRUD HTTP, las validaciones, los duplicados, la protección de relaciones, la reversión de operaciones fallidas, la precisión de horas y el cálculo de avance.
 
 ## Entregables
 
