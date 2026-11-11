@@ -4,7 +4,7 @@
 
 Gestionar estudiantes, empresas, asignaciones de práctica y reportes semanales de horas. Coordinación debe poder consultar el avance de cada estudiante frente a las horas requeridas. Por solicitud posterior, el alcance incluye CRUD completo de las cuatro entidades.
 
-Fuente: [Prueba_practica_Johand_Castro.pdf](Prueba_practica_Johand_Castro.pdf). Este documento desarrolla la especificación de la Parte 1 y deberá actualizarse con el cambio que indiquen los evaluadores en la Parte 3. El CRUD, la persistencia y la consulta de avance están implementados en la API; la presentación y las notas de revisión de código quedan pendientes.
+Fuente: [Prueba_practica_Johand_Castro.pdf](Prueba_practica_Johand_Castro.pdf). Este documento desarrolla la especificación de la Parte 1 y deberá actualizarse con el cambio que indiquen los evaluadores en la Parte 3. El CRUD, la persistencia y la consulta de avance están implementados en la API. Las notas de revisión de código están en [CODE_REVIEW.md](CODE_REVIEW.md); la presentación queda pendiente.
 
 ## Requisitos del enunciado
 

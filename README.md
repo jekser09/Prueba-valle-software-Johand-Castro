@@ -64,16 +64,88 @@ Los servicios comprueban la existencia de registros (`404`), la semana frente al
 
 ## Ejecución local
 
-Desde la raíz del repositorio, instalar las dependencias y arrancar el servidor con uv:
+Requisitos: **Python 3.15 o superior** y **uv** instalado. Abrir una terminal en la raíz del repositorio, donde se encuentra `main.py`.
 
-```powershell
-uv sync
-uv run uvicorn main:app --reload
+1. Instalar las dependencias en el entorno virtual:
+
+   ```powershell
+   uv sync --no-install-project
+   ```
+
+2. Iniciar el servidor de desarrollo:
+
+   ```powershell
+   uv run --no-sync uvicorn main:app --reload
+   ```
+
+Estos comandos instalan las dependencias y ejecutan la aplicación directamente desde la raíz. Se omite la instalación del paquete de la plantilla original, ya que el punto de entrada de la API es `main.py`.
+
+3. Abrir [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health). Debe responder:
+
+   ```json
+   {"status": "ok"}
+   ```
+
+Al iniciar se crea automáticamente `practicas.sqlite3` y las tablas faltantes. Para detener el servidor, presionar `Ctrl+C` en la terminal.
+
+## Probar los endpoints desde FastAPI
+
+Con el servidor encendido, abrir **[http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)**. Esta documentación interactiva permite ejecutar los endpoints desde el navegador.
+
+1. Expandir el endpoint que se desea probar.
+2. Pulsar **Try it out**.
+3. Completar el cuerpo JSON o el parámetro `id`, según corresponda.
+4. Pulsar **Execute**.
+5. Revisar **Server response**, donde se muestran el código HTTP y el cuerpo de la respuesta.
+
+Para probar el flujo completo, ejecutar las siguientes operaciones en orden y usar los identificadores que devuelva cada alta:
+
+**Crear un estudiante — `POST /estudiantes`:**
+
+```json
+{
+  "documento": "001",
+  "nombre": "Ana Pérez",
+  "correo": "ana@example.com",
+  "programa": "Ingeniería de Software"
+}
 ```
 
-La API estará disponible en `http://127.0.0.1:8000`, la comprobación en `/health` y la documentación interactiva en `/docs`.
+**Crear una empresa — `POST /empresas`:**
 
-FastAPI y Uvicorn están declarados en `pyproject.toml` y disponibles en el entorno local.
+```json
+{
+  "nit": "900123456",
+  "nombre": "Empresa de ejemplo",
+  "correo_contacto": "contacto@example.com"
+}
+```
+
+**Asignar la práctica — `POST /asignaciones`:** reemplazar los identificadores del ejemplo por los recibidos en los pasos anteriores.
+
+```json
+{
+  "estudiante_id": 1,
+  "empresa_id": 1,
+  "fecha_inicio": "2026-11-02",
+  "horas_requeridas": "120"
+}
+```
+
+**Reportar horas — `POST /reportes-horas`:** usar el identificador de la asignación creada. `semana_inicio` debe ser lunes, no estar en el futuro y corresponder a una semana válida para la práctica.
+
+```json
+{
+  "asignacion_id": 1,
+  "semana_inicio": "2026-11-02",
+  "horas": "30",
+  "observaciones": "Actividades de la primera semana"
+}
+```
+
+**Consultar el avance — `GET /avance` o `GET /estudiantes/{id}/avance`:** para el ejemplo anterior se esperan 30 horas reportadas, 90 pendientes y 25 % de avance.
+
+Para completar el CRUD, probar los listados y consultas `GET`, reemplazar los campos editables con `PUT` y eliminar con `DELETE`. Los códigos esperados son `201` al crear, `200` al consultar o actualizar y `204` al eliminar. Un dato inválido devuelve `422`, un identificador inexistente `404` y un duplicado o registro con dependencias `409`. Repetir los ejemplos sin cambiar documento, NIT o semana genera conflictos; las pruebas desde `/docs` guardan los cambios en la base de datos local.
 
 ## Base de datos
 
@@ -97,7 +169,7 @@ Las horas se almacenan como centésimas enteras para conservar su precisión. Lo
 Las pruebas usan bases de datos aisladas y no modifican `practicas.sqlite3`:
 
 ```powershell
-uv run python -m unittest discover -s tests -v
+uv run --no-sync python -m unittest discover -s tests -v
 ```
 
 Cubren el CRUD HTTP, las validaciones, los duplicados, la protección de relaciones, la reversión de operaciones fallidas, la precisión de horas y el cálculo de avance.
@@ -105,7 +177,7 @@ Cubren el CRUD HTTP, las validaciones, los duplicados, la protección de relacio
 ## Entregables
 
 - Repositorio Git o carpeta comprimida con el código y el historial de commits.
-- Documento de especificación, actualizado con el cambio de requisitos introducido durante la prueba.
-- Notas de revisión del código incluido en el enunciado.
+- [REQUIREMENTS.md](REQUIREMENTS.md): respuesta a la **Parte 1 — Especificación**. Incluye entidades, campos, funcionalidades, reglas de negocio, criterios de aceptación y límites de alcance. Registra también las ampliaciones solicitadas durante el desarrollo y el espacio para incorporar el cambio de la Parte 3 cuando lo indiquen los evaluadores.
+- [CODE_REVIEW.md](CODE_REVIEW.md): respuesta a la **Parte 4 — Revisión de código**. Presenta los problemas identificados, su gravedad, las correcciones propuestas y las medidas de capacitación y prevención como líder del área.
 
-Las pautas para trabajar en el repositorio y los requisitos que deben preservarse están en [AGENTS.md](AGENTS.md). La especificación está en [REQUIREMENTS.md](REQUIREMENTS.md); las notas de revisión de código quedan pendientes.
+Estos dos documentos forman parte de las respuestas del ejercicio. Las pautas de trabajo para agentes y colaboradores están en [AGENTS.md](AGENTS.md).
