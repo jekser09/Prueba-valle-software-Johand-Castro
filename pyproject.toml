@@ -1,10 +1,13 @@
 [project]
 name = "prueba-tecnica-johand-castro"
 version = "0.1.0"
-description = "Add your description here"
+description = "Sistema de seguimiento de prácticas profesionales"
 readme = "README.md"
 requires-python = ">=3.15"
-dependencies = []
+dependencies = [
+    "fastapi",
+    "uvicorn",
+]
 
 [project.scripts]
 prueba-tecnica-johand-castro = "prueba_tecnica_johand_castro:main"

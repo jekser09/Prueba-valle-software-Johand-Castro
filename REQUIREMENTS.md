@@ -81,6 +81,10 @@ Estas reglas son supuestos de diseño y deberán revisarse si los evaluadores es
 
 ## Cálculo del avance
 
+### Representación física en SQLite
+
+Las horas siguen expresándose como decimales en el modelo lógico y la futura API. Para conservar la precisión de las sumas, SQLite almacena centésimas de hora como enteros: `asignaciones_practica.horas_requeridas_centesimas` y `reportes_horas.horas_centesimas`. Por ejemplo, 1,25 horas se guardan como 125. La capa de servicios deberá convertir entre ambas representaciones sin usar aritmética de punto flotante. Las fechas se almacenan como texto ISO `AAAA-MM-DD`; la validación de fechas, correos y reglas entre registros queda pendiente en los esquemas y servicios.
+
 Para una asignación:
 
 ```text
